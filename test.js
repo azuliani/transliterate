@@ -274,3 +274,37 @@ test('detects overlapping replacements not handled by locales', t => {
 	// The test passes if there are no conflicts
 	t.is(conflicts.length, 0, `Found ${conflicts.length} character conflicts in replacements`);
 });
+
+test('performance scales linearly (no ReDoS)', t => {
+	// Test that processing time scales linearly with input size
+	// This catches potential ReDoS issues in the regex pattern
+
+	const measure = size => {
+		const string = 'äöüß'.repeat(size / 4);
+		const start = performance.now();
+		transliterate(string);
+		return performance.now() - start;
+	};
+
+	// Warmup
+	measure(1000);
+
+	const time10k = measure(10_000);
+	const time100k = measure(100_000);
+
+	// 100k should take roughly 10x as long as 10k (linear scaling)
+	// We use 20x as threshold to account for variance
+	const ratio = time100k / time10k;
+	t.true(ratio < 20, `Expected linear scaling but got ${ratio.toFixed(1)}x for 10x input`);
+});
+
+test('handles large input efficiently', t => {
+	// Regression test for issue #40 - performance should not degrade with long strings
+	const longString = '<div class="container">'.repeat(1000);
+	const start = performance.now();
+	const result = transliterate(longString);
+	const elapsed = performance.now() - start;
+
+	t.is(result, longString); // ASCII passthrough
+	t.true(elapsed < 100, `Expected < 100ms but took ${elapsed.toFixed(1)}ms`);
+});

@@ -1,13 +1,17 @@
 import builtinReplacements from './replacements.js';
 import localeReplacements from './locale-replacements.js';
 
-const doCustomReplacements = (string, replacements) => {
-	for (const [key, value] of replacements) {
-		string = string.replaceAll(key, value);
-	}
+// TODO: Use Regex.escape when targeting Node.js 24.
+const escapeRegex = string => string.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 
-	return string;
+const buildReplacementPattern = replacements => {
+	// Sort by key length descending so longer patterns match first (e.g., 'ու' before 'ո')
+	const sortedKeys = [...replacements.keys()].sort((a, b) => b.length - a.length);
+	return new RegExp(sortedKeys.map(key => escapeRegex(key)).join('|'), 'gu');
 };
+
+// Pre-compile the default pattern for performance
+const defaultPattern = buildReplacementPattern(builtinReplacements);
 
 const getLocaleReplacements = locale => {
 	if (!locale) {
@@ -35,9 +39,10 @@ export default function transliterate(string, options) {
 
 	const localeMap = getLocaleReplacements(options.locale);
 
-	let replacements = builtinReplacements;
-
 	const hasCustomReplacements = options.customReplacements.length > 0 || options.customReplacements.size > 0;
+
+	let replacements = builtinReplacements;
+	let pattern = defaultPattern;
 
 	if (localeMap || hasCustomReplacements) {
 		replacements = new Map(builtinReplacements);
@@ -51,10 +56,12 @@ export default function transliterate(string, options) {
 		for (const [key, value] of options.customReplacements) {
 			replacements.set(key, value);
 		}
+
+		pattern = buildReplacementPattern(replacements);
 	}
 
 	string = string.normalize();
-	string = doCustomReplacements(string, replacements);
+	string = string.replace(pattern, match => replacements.get(match) ?? match);
 	string = string.normalize('NFD').replaceAll(/\p{Diacritic}/gu, '').normalize();
 
 	// Normalize all dash types to hyphen-minus
