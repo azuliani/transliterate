@@ -1,19 +1,21 @@
-# transliterate
+# @azuliani/transliterate
 
 > Convert Unicode characters to Latin characters using [transliteration](https://en.wikipedia.org/wiki/Transliteration)
+
+This is a fork of [@sindresorhus/transliterate](https://github.com/sindresorhus/transliterate) that adds CommonJS support. The original package is ESM-only, which can be problematic in some environments.
 
 Can be useful for [slugification](https://github.com/sindresorhus/slugify) purposes and other times you cannot use Unicode.
 
 ## Install
 
 ```sh
-npm install @sindresorhus/transliterate
+npm install @azuliani/transliterate
 ```
 
 ## Usage
 
 ```js
-import transliterate from '@sindresorhus/transliterate';
+import transliterate from '@azuliani/transliterate';
 
 transliterate('Fußgängerübergänge');
 //=> 'Fussgaengeruebergaenge'
@@ -57,7 +59,7 @@ The replacements are run on the original string before any other transformations
 This only overrides a default replacement if you set an item with the same key.
 
 ```js
-import transliterate from '@sindresorhus/transliterate';
+import transliterate from '@azuliani/transliterate';
 
 transliterate('Я люблю единорогов', {
 	customReplacements: [
@@ -87,7 +89,7 @@ Type: `string`
 When specified, uses language-specific replacement rules for characters that have different transliterations in different languages.
 
 ```js
-import transliterate from '@sindresorhus/transliterate';
+import transliterate from '@azuliani/transliterate';
 
 // Swedish: ä→a, ö→o, å→a
 transliterate('Räksmörgås', {locale: 'sv'});

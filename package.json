@@ -1,9 +1,9 @@
 {
-	"name": "@sindresorhus/transliterate",
+	"name": "@azuliani/transliterate",
 	"version": "2.3.1",
 	"description": "Convert Unicode characters to Latin characters using transliteration",
 	"license": "MIT",
-	"repository": "sindresorhus/transliterate",
+	"repository": "azuliani/transliterate",
 	"funding": "https://github.com/sponsors/sindresorhus",
 	"author": {
 		"name": "Sindre Sorhus",
@@ -12,21 +12,31 @@
 	},
 	"type": "module",
 	"exports": {
-		"types": "./index.d.ts",
-		"default": "./index.js"
+		".": {
+			"types": "./index.d.ts",
+			"require": "./index.cjs",
+			"import": "./index.js"
+		}
 	},
+	"main": "./index.cjs",
 	"sideEffects": false,
 	"engines": {
-		"node": ">=20"
+		"node": ">=18"
 	},
 	"scripts": {
+		"build": "tsup",
+		"prepare": "test -f dist/index.cjs || (test -d node_modules/tsup && npm run build) || true",
+		"prepublishOnly": "npm run build",
 		"test": "xo && ava"
 	},
 	"files": [
 		"index.js",
+		"index.cjs",
 		"index.d.ts",
 		"replacements.js",
-		"locale-replacements.js"
+		"locale-replacements.js",
+		"tsup.config.js",
+		"dist"
 	],
 	"keywords": [
 		"transliterate",
@@ -43,6 +53,7 @@
 	],
 	"devDependencies": {
 		"ava": "^6.4.1",
+		"tsup": "^8.5.1",
 		"xo": "^1.2.2"
 	}
 }
